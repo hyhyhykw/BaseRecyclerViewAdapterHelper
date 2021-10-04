@@ -11,11 +11,14 @@ import com.chad.baserecyclerviewadapterhelper.entity.Status;
 import com.chad.baserecyclerviewadapterhelper.utils.SpannableStringUtils;
 import com.chad.baserecyclerviewadapterhelper.utils.Tips;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.chad.library.adapter.base.module.BaseLoadMoreModule;
 import com.chad.library.adapter.base.viewholder.BaseViewHolder;
 import com.chad.library.adapter.base.module.LoadMoreModule;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import androidx.annotation.NonNull;
 
 /**
  * @author: limuyang
@@ -61,4 +64,10 @@ public class LoadMoreAdapter extends BaseQuickAdapter<Status, BaseViewHolder> im
             ds.setUnderlineText(true);
         }
     };
+
+    @NonNull
+    @Override
+    public BaseLoadMoreModule addLoadMoreModule(@NonNull BaseQuickAdapter<?, ?> baseQuickAdapter) {
+        return null;
+    }
 }

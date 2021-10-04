@@ -40,9 +40,10 @@ import kotlin.collections.ArrayList
  * @constructor layoutId, data(Can null parameters, the default is empty data)
  */
 abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
-@JvmOverloads constructor(@LayoutRes private val layoutResId: Int,
-                          data: MutableList<T>? = null)
-    : RecyclerView.Adapter<VH>() {
+@JvmOverloads constructor(
+    @LayoutRes private val layoutResId: Int,
+    data: MutableList<T>? = null
+) : RecyclerView.Adapter<VH>() {
 
     companion object {
         const val HEADER_VIEW = 0x10000111
@@ -306,7 +307,8 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
             } else {
                 position
             }
-            val dataSize = data.size
+
+            val dataSize = getDefItemCount()
             return if (adjPosition < dataSize) {
                 getDefItemViewType(adjPosition)
             } else {
@@ -401,12 +403,18 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
                         return 1
                     }
                     return if (mSpanSizeLookup == null) {
-                        if (isFixedViewType(type)) manager.spanCount else defSpanSizeLookup.getSpanSize(position)
+                        if (isFixedViewType(type)) manager.spanCount else defSpanSizeLookup.getSpanSize(
+                            position
+                        )
                     } else {
                         if (isFixedViewType(type))
                             manager.spanCount
                         else
-                            mSpanSizeLookup!!.getSpanSize(manager, type, position - headerLayoutCount)
+                            mSpanSizeLookup!!.getSpanSize(
+                                manager,
+                                type,
+                                position - headerLayoutCount
+                            )
                     }
                 }
 
@@ -492,7 +500,7 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
     protected open fun bindViewClickListener(viewHolder: VH, viewType: Int) {
         mOnItemClickListener?.let {
             viewHolder.itemView.setOnClickListener { v ->
-                var position = viewHolder.adapterPosition
+                var position = viewHolder.bindingAdapterPosition
                 if (position == RecyclerView.NO_POSITION) {
                     return@setOnClickListener
                 }
@@ -502,7 +510,7 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
         }
         mOnItemLongClickListener?.let {
             viewHolder.itemView.setOnLongClickListener { v ->
-                var position = viewHolder.adapterPosition
+                var position = viewHolder.bindingAdapterPosition
                 if (position == RecyclerView.NO_POSITION) {
                     return@setOnLongClickListener false
                 }
@@ -518,7 +526,7 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
                         childView.isClickable = true
                     }
                     childView.setOnClickListener { v ->
-                        var position = viewHolder.adapterPosition
+                        var position = viewHolder.bindingAdapterPosition
                         if (position == RecyclerView.NO_POSITION) {
                             return@setOnClickListener
                         }
@@ -535,7 +543,7 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
                         childView.isLongClickable = true
                     }
                     childView.setOnLongClickListener { v ->
-                        var position = viewHolder.adapterPosition
+                        var position = viewHolder.bindingAdapterPosition
                         if (position == RecyclerView.NO_POSITION) {
                             return@setOnLongClickListener false
                         }
@@ -656,7 +664,10 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
                         }
                     } else if (temp is ParameterizedType) {
                         val rawType = temp.rawType
-                        if (rawType is Class<*> && BaseViewHolder::class.java.isAssignableFrom(rawType)) {
+                        if (rawType is Class<*> && BaseViewHolder::class.java.isAssignableFrom(
+                                rawType
+                            )
+                        ) {
                             return rawType
                         }
                     }
@@ -729,7 +740,7 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
     fun getViewByPosition(position: Int, @IdRes viewId: Int): View? {
         val recyclerView = recyclerViewOrNull ?: return null
         val viewHolder = recyclerView.findViewHolderForLayoutPosition(position) as BaseViewHolder?
-                ?: return null
+            ?: return null
         return viewHolder.getViewOrNull(viewId)
     }
 
@@ -925,7 +936,7 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
                     return position
                 }
             } else {
-                return headerLayoutCount + data.size
+                return headerLayoutCount + getDefItemCount()
             }
             return -1
         }
@@ -1011,7 +1022,7 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
         }
     }
 
-    fun hasEmptyView(): Boolean {
+    open fun hasEmptyView(): Boolean {
         if (!this::mEmptyLayout.isInitialized || mEmptyLayout.childCount == 0) {
             return false
         }
@@ -1097,7 +1108,10 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
      *
      * @param data
      */
-    @Deprecated("Please use setNewInstance(), This method will be removed in the next version", replaceWith = ReplaceWith("setNewInstance(data)"))
+    @Deprecated(
+        "Please use setNewInstance(), This method will be removed in the next version",
+        replaceWith = ReplaceWith("setNewInstance(data)")
+    )
     open fun setNewData(data: MutableList<T>?) {
         setNewInstance(data)
     }
@@ -1165,7 +1179,7 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
      * 改变某一位置数据
      */
     open fun setData(@IntRange(from = 0) index: Int, data: T) {
-        if (index >= this.data.size) {
+        if (index >= getDefItemCount()) {
             return
         }
         this.data[index] = data
@@ -1357,5 +1371,6 @@ abstract class BaseQuickAdapter<T, VH : BaseViewHolder>
 
     fun getOnItemChildClickListener(): OnItemChildClickListener? = mOnItemChildClickListener
 
-    fun getOnItemChildLongClickListener(): OnItemChildLongClickListener? = mOnItemChildLongClickListener
+    fun getOnItemChildLongClickListener(): OnItemChildLongClickListener? =
+        mOnItemChildLongClickListener
 }
